@@ -93,7 +93,7 @@ func New(
 		FlowcontrolClient:      flowcontrolClient,
 		ServerConcurrencyLimit: serverConcurrencyLimit,
 		RequestWaitLimit:       requestWaitLimit,
-		ObsPairGenerator:       metrics.PriorityLevelConcurrencyObserverPairGenerator,
+		ObsPairGenerator:       nil,
 		QueueSetFactory:        fqs.NewQueueSetFactory(clk, grc),
 	})
 }

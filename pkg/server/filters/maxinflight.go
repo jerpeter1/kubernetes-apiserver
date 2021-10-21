@@ -89,11 +89,11 @@ func (w *requestWatermark) recordReadOnly(readOnlyVal int) {
 }
 
 // watermark tracks requests being executed (not waiting in a queue)
-var watermark = &requestWatermark{
-	phase:            metrics.ExecutingPhase,
-	readOnlyObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{metrics.ReadOnlyKind}).RequestsExecuting,
-	mutatingObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{metrics.MutatingKind}).RequestsExecuting,
-}
+// var watermark = &requestWatermark{
+// 	phase:            metrics.ExecutingPhase,
+// 	readOnlyObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{metrics.ReadOnlyKind}).RequestsExecuting,
+// 	mutatingObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{metrics.MutatingKind}).RequestsExecuting,
+// }
 
 // startWatermarkMaintenance starts the goroutines to observe and maintain the specified watermark.
 func startWatermarkMaintenance(watermark *requestWatermark, stopCh <-chan struct{}) {
@@ -132,11 +132,11 @@ func WithMaxInFlightLimit(
 	var mutatingChan chan bool
 	if nonMutatingLimit != 0 {
 		nonMutatingChan = make(chan bool, nonMutatingLimit)
-		watermark.readOnlyObserver.SetX1(float64(nonMutatingLimit))
+		// watermark.readOnlyObserver.SetX1(float64(nonMutatingLimit))
 	}
 	if mutatingLimit != 0 {
 		mutatingChan = make(chan bool, mutatingLimit)
-		watermark.mutatingObserver.SetX1(float64(mutatingLimit))
+		// watermark.mutatingObserver.SetX1(float64(mutatingLimit))
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -170,20 +170,20 @@ func WithMaxInFlightLimit(
 				// We note the concurrency level both while the
 				// request is being served and after it is done being
 				// served, because both states contribute to the
-				// sampled stats on concurrency.
-				if isMutatingRequest {
-					watermark.recordMutating(len(c))
-				} else {
-					watermark.recordReadOnly(len(c))
-				}
-				defer func() {
-					<-c
-					if isMutatingRequest {
-						watermark.recordMutating(len(c))
-					} else {
-						watermark.recordReadOnly(len(c))
-					}
-				}()
+				// // sampled stats on concurrency.
+				// if isMutatingRequest {
+				// 	watermark.recordMutating(len(c))
+				// } else {
+				// 	watermark.recordReadOnly(len(c))
+				// }
+				// defer func() {
+				// 	<-c
+				// 	if isMutatingRequest {
+				// 		watermark.recordMutating(len(c))
+				// 	} else {
+				// 		watermark.recordReadOnly(len(c))
+				// 	}
+				// }()
 				handler.ServeHTTP(w, r)
 
 			default:
@@ -212,9 +212,9 @@ func WithMaxInFlightLimit(
 
 // StartMaxInFlightWatermarkMaintenance starts the goroutines to observe and maintain watermarks for max-in-flight
 // requests.
-func StartMaxInFlightWatermarkMaintenance(stopCh <-chan struct{}) {
-	startWatermarkMaintenance(watermark, stopCh)
-}
+// func StartMaxInFlightWatermarkMaintenance(stopCh <-chan struct{}) {
+// 	startWatermarkMaintenance(watermark, stopCh)
+// }
 
 func tooManyRequests(req *http.Request, w http.ResponseWriter) {
 	// Return a 429 status indicating "Too Many Requests"

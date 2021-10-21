@@ -21,14 +21,12 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
-	"sync/atomic"
 
 	flowcontrol "k8s.io/api/flowcontrol/v1beta1"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	epmetrics "k8s.io/apiserver/pkg/endpoints/metrics"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
 	utilflowcontrol "k8s.io/apiserver/pkg/util/flowcontrol"
-	fcmetrics "k8s.io/apiserver/pkg/util/flowcontrol/metrics"
 	flowcontrolrequest "k8s.io/apiserver/pkg/util/flowcontrol/request"
 	"k8s.io/klog/v2"
 )
@@ -43,11 +41,11 @@ type PriorityAndFairnessClassification struct {
 }
 
 // waitingMark tracks requests waiting rather than being executed
-var waitingMark = &requestWatermark{
-	phase:            epmetrics.WaitingPhase,
-	readOnlyObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{epmetrics.ReadOnlyKind}).RequestsWaiting,
-	mutatingObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{epmetrics.MutatingKind}).RequestsWaiting,
-}
+// var waitingMark = &requestWatermark{
+// 	phase:            epmetrics.WaitingPhase,
+// 	readOnlyObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{epmetrics.ReadOnlyKind}).RequestsWaiting,
+// 	mutatingObserver: fcmetrics.ReadWriteConcurrencyObserverPairGenerator.Generate(1, 1, []string{epmetrics.MutatingKind}).RequestsWaiting,
+// }
 
 var atomicMutatingExecuting, atomicReadOnlyExecuting int32
 var atomicMutatingWaiting, atomicReadOnlyWaiting int32
@@ -101,18 +99,18 @@ func WithPriorityAndFairness(
 		var served bool
 		isMutatingRequest := !nonMutatingRequestVerbs.Has(requestInfo.Verb)
 		noteExecutingDelta := func(delta int32) {
-			if isMutatingRequest {
-				watermark.recordMutating(int(atomic.AddInt32(&atomicMutatingExecuting, delta)))
-			} else {
-				watermark.recordReadOnly(int(atomic.AddInt32(&atomicReadOnlyExecuting, delta)))
-			}
+			// if isMutatingRequest {
+			// 	watermark.recordMutating(int(atomic.AddInt32(&atomicMutatingExecuting, delta)))
+			// } else {
+			// 	watermark.recordReadOnly(int(atomic.AddInt32(&atomicReadOnlyExecuting, delta)))
+			// }
 		}
 		noteWaitingDelta := func(delta int32) {
-			if isMutatingRequest {
-				waitingMark.recordMutating(int(atomic.AddInt32(&atomicMutatingWaiting, delta)))
-			} else {
-				waitingMark.recordReadOnly(int(atomic.AddInt32(&atomicReadOnlyWaiting, delta)))
-			}
+			// if isMutatingRequest {
+			// 	waitingMark.recordMutating(int(atomic.AddInt32(&atomicMutatingWaiting, delta)))
+			// } else {
+			// 	waitingMark.recordReadOnly(int(atomic.AddInt32(&atomicReadOnlyWaiting, delta)))
+			// }
 		}
 		queueNote := func(inQueue bool) {
 			if inQueue {
@@ -267,8 +265,8 @@ func WithPriorityAndFairness(
 // StartPriorityAndFairnessWatermarkMaintenance starts the goroutines to observe and maintain watermarks for
 // priority-and-fairness requests.
 func StartPriorityAndFairnessWatermarkMaintenance(stopCh <-chan struct{}) {
-	startWatermarkMaintenance(watermark, stopCh)
-	startWatermarkMaintenance(waitingMark, stopCh)
+	// startWatermarkMaintenance(watermark, stopCh)
+	// startWatermarkMaintenance(waitingMark, stopCh)
 }
 
 func setResponseHeaders(classification *PriorityAndFairnessClassification, w http.ResponseWriter) {

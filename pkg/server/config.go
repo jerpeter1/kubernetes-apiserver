@@ -680,29 +680,29 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 	}
 
 	// Add PostStartHooks for maintaining the watermarks for the Priority-and-Fairness and the Max-in-Flight filters.
-	if c.FlowControl != nil {
-		const priorityAndFairnessFilterHookName = "priority-and-fairness-filter"
-		if !s.isPostStartHookRegistered(priorityAndFairnessFilterHookName) {
-			err := s.AddPostStartHook(priorityAndFairnessFilterHookName, func(context PostStartHookContext) error {
-				genericfilters.StartPriorityAndFairnessWatermarkMaintenance(context.StopCh)
-				return nil
-			})
-			if err != nil {
-				return nil, err
-			}
-		}
-	} else {
-		const maxInFlightFilterHookName = "max-in-flight-filter"
-		if !s.isPostStartHookRegistered(maxInFlightFilterHookName) {
-			err := s.AddPostStartHook(maxInFlightFilterHookName, func(context PostStartHookContext) error {
-				genericfilters.StartMaxInFlightWatermarkMaintenance(context.StopCh)
-				return nil
-			})
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
+	// if c.FlowControl != nil {
+	// 	const priorityAndFairnessFilterHookName = "priority-and-fairness-filter"
+	// 	if !s.isPostStartHookRegistered(priorityAndFairnessFilterHookName) {
+	// 		err := s.AddPostStartHook(priorityAndFairnessFilterHookName, func(context PostStartHookContext) error {
+	// 			genericfilters.StartPriorityAndFairnessWatermarkMaintenance(context.StopCh)
+	// 			return nil
+	// 		})
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// } else {
+	// 	const maxInFlightFilterHookName = "max-in-flight-filter"
+	// 	if !s.isPostStartHookRegistered(maxInFlightFilterHookName) {
+	// 		err := s.AddPostStartHook(maxInFlightFilterHookName, func(context PostStartHookContext) error {
+	// 			genericfilters.StartMaxInFlightWatermarkMaintenance(context.StopCh)
+	// 			return nil
+	// 		})
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
 
 	for _, delegateCheck := range delegationTarget.HealthzChecks() {
 		skip := false
